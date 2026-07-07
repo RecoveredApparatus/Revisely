@@ -1,5 +1,5 @@
 import React from 'react';
-import { Widget } from 'react-native-android-widget';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FlashcardWidget } from './FlashcardWidget';
 
@@ -41,9 +41,7 @@ export async function widgetTaskHandler(props) {
     case 'WIDGET_UPDATE':
     case 'WIDGET_RESIZED':
       props.renderWidget(
-        <Widget>
-          <FlashcardWidget title={title} front={front} subjectColor={subjectColor} />
-        </Widget>
+        <FlashcardWidget title={title} front={front} subjectColor={subjectColor} />
       );
       break;
     default:

@@ -1,0 +1,21 @@
+workflows:
+  react-native-android:
+    name: Revisely Android Build
+    max_build_duration: 120
+    instance_type: mac_mini_m1
+    environment:
+      node: 20
+      java: 17
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          npm install
+      - name: Generate Native Android Code (Expo Prebuild)
+        script: |
+          npx expo prebuild -p android --clean
+      - name: Build Android APK
+        script: |
+          cd android
+          ./gradlew assembleDebug
+    artifacts:
+      - android/app/build/outputs/**/*.apk

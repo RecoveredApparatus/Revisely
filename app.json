@@ -5,20 +5,46 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0a0c14"
+    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0a0c14",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "package": "com.revisely.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-status-bar",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "FlashcardWidget",
+              "displayName": "Revisely Flashcard",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "updatePeriodMillis": 3600000
+            }
+          ]
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "344f6920-0d75-47a3-8c0d-97112b78bca0"
+      }
     }
   }
 }

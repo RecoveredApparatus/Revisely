@@ -2,7 +2,7 @@ import React from 'react';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
 
 /**
- * FlashcardWidget — Premium Android home screen widget.
+ * FlashcardWidget — Premium Android home screen widget with "illusion" effects.
  *
  * Props:
  *   deckName     – subject / deck name
@@ -26,8 +26,29 @@ export function FlashcardWidget({
   const deck = deckName || 'Revisely';
   const title = cardTitle || 'No card';
   const text = cardText || 'Tap Flip to reveal';
-  const counter = `${(cardIndex ?? 0) + 1} of ${totalCards ?? 0}`;
+  
+  const currentIndex = cardIndex ?? 0;
+  const total = totalCards ?? 0;
+  
+  const counter = `${currentIndex + 1} of ${total}`;
   const sideLabel = isFlipped ? '✦ ANSWER' : '✧ QUESTION';
+
+  // Illusion of animation: Change layout based on flip state
+  const gradientOrientation = isFlipped ? 'BOTTOM_TOP' : 'TOP_BOTTOM';
+  const cardBgColor = isFlipped ? '#151824' : '#0d0f17';
+  
+  // Progress bar logic
+  const progressRatio = total > 0 ? (currentIndex + 1) / total : 0;
+  
+  // Dots indicator logic
+  const dots = [];
+  if (total > 0) {
+    if (currentIndex > 0) dots.push('○'); // prev dot
+    dots.push('●'); // current dot
+    if (currentIndex < total - 1) dots.push('○'); // next dot
+  } else {
+    dots.push('●');
+  }
 
   return (
     <FlexWidget
@@ -40,22 +61,43 @@ export function FlashcardWidget({
         backgroundGradient: {
           from: '#12141f',
           to: '#1e2235',
-          orientation: 'TOP_BOTTOM',
+          orientation: gradientOrientation,
         },
         borderWidth: 1,
         borderColor: '#2a2e42',
       }}
+      clickAction="OPEN_APP"
     >
-      {/* ── Top accent strip ── */}
+      {/* ── Top accent strip (if NOT flipped) ── */}
+      {!isFlipped && (
+        <FlexWidget
+          style={{
+            width: 'match_parent',
+            height: 4,
+            backgroundColor: accent,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+          }}
+        />
+      )}
+
+      {/* ── Progress bar ── */}
       <FlexWidget
         style={{
           width: 'match_parent',
-          height: 4,
-          backgroundColor: accent,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
+          height: 2,
+          backgroundColor: '#00000040',
         }}
-      />
+      >
+        <FlexWidget
+          style={{
+            flex: progressRatio || 0.01,
+            height: 2,
+            backgroundColor: accent,
+          }}
+        />
+        <FlexWidget style={{ flex: Math.max(0, 1 - progressRatio), height: 2 }} />
+      </FlexWidget>
 
       {/* ── Header: deck name + counter ── */}
       <FlexWidget
@@ -66,7 +108,7 @@ export function FlashcardWidget({
           justifyContent: 'space-between',
           alignItems: 'center',
           paddingHorizontal: 18,
-          paddingTop: 14,
+          paddingTop: 12,
           paddingBottom: 6,
         }}
       >
@@ -151,10 +193,10 @@ export function FlashcardWidget({
           flexDirection: 'column',
           justifyContent: 'flex-start',
           marginHorizontal: 18,
-          marginBottom: 12,
+          marginBottom: 8,
           paddingHorizontal: 14,
           paddingVertical: 12,
-          backgroundColor: '#0d0f17',
+          backgroundColor: cardBgColor,
           borderRadius: 14,
           borderWidth: 1,
           borderColor: '#2a2e42',
@@ -171,6 +213,24 @@ export function FlashcardWidget({
           maxLines={8}
           truncate="END"
         />
+        
+        <FlexWidget
+          style={{
+            width: 'match_parent',
+            flex: 1,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
+        >
+          <TextWidget
+             text={dots.join('  ')}
+             style={{
+               fontSize: 8,
+               color: '#64748b',
+               textAlign: 'center',
+             }}
+          />
+        </FlexWidget>
       </FlexWidget>
 
       {/* ── Bottom action bar ── */}
@@ -182,7 +242,7 @@ export function FlashcardWidget({
           justifyContent: 'space-between',
           alignItems: 'center',
           paddingHorizontal: 14,
-          paddingBottom: 14,
+          paddingBottom: 10,
           flexGap: 8,
         }}
       >
@@ -255,6 +315,37 @@ export function FlashcardWidget({
             }}
           />
         </FlexWidget>
+      </FlexWidget>
+
+      {/* ── Bottom accent strip (if flipped) ── */}
+      {isFlipped && (
+        <FlexWidget
+          style={{
+            width: 'match_parent',
+            height: 4,
+            backgroundColor: accent,
+            borderBottomLeftRadius: 20,
+            borderBottomRightRadius: 20,
+          }}
+        />
+      )}
+      
+      {/* ── Open App Hint ── */}
+      <FlexWidget
+        style={{
+          width: 'match_parent',
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingBottom: 6,
+        }}
+      >
+        <TextWidget
+          text="Tap anywhere to open app"
+          style={{
+            fontSize: 9,
+            color: '#475569',
+          }}
+        />
       </FlexWidget>
     </FlexWidget>
   );

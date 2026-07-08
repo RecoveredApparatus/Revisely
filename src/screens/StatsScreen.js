@@ -9,8 +9,9 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
 import { colors, getSubjectColors } from '../theme/colors';
-import { loadCards, loadStats } from '../utils/storage';
+import { loadCards, loadStats, saveCards, saveStats } from '../utils/storage';
 import { defaultCards, defaultSubjects } from '../data/defaultCards';
+import { Alert } from 'react-native';
 
 export default function StatsScreen() {
   const [cards, setCards] = useState([]);
@@ -57,6 +58,9 @@ export default function StatsScreen() {
 
   const mathsTotal = cards.filter(c => c.subjectId === 'maths').length;
   const mathsMastered = cards.filter(c => c.subjectId === 'maths' && c.mastered).length;
+  
+  const chemTotal = cards.filter(c => c.subjectId === 'chem').length;
+  const chemMastered = cards.filter(c => c.subjectId === 'chem' && c.mastered).length;
 
   const achievements = [
     {
@@ -77,7 +81,28 @@ export default function StatsScreen() {
       desc: '100% of Maths deck mastered.',
       unlocked: mathsTotal > 0 && mathsMastered === mathsTotal,
     },
+    { emoji: '📚', title: 'Bookworm', desc: 'Created 20+ flashcards.', unlocked: totalCards >= 20 },
+    { emoji: '⚡', title: 'Speed Learner', desc: 'Completed 50+ reviews.', unlocked: (stats.totalReviews || 0) >= 50 },
+    { emoji: '🎯', title: 'Perfect Chemistry', desc: '100% of Chemistry mastered.', unlocked: chemTotal > 0 && chemMastered === chemTotal },
+    { emoji: '💪', title: 'Half Way There', desc: 'Mastered 50% of all cards.', unlocked: totalCards > 0 && masteredCards >= totalCards / 2 },
   ];
+
+  const handleReset = () => {
+    Alert.alert('Reset Progress', 'Are you sure you want to reset all your progress? This cannot be undone.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Reset',
+        style: 'destructive',
+        onPress: async () => {
+          const resetCards = cards.map(c => ({ ...c, mastered: false, reviewCount: 0 }));
+          const resetStats = { streak: 0, totalReviews: 0, lastReviewDate: null };
+          await saveCards(resetCards);
+          await saveStats(resetStats);
+          loadData();
+        },
+      },
+    ]);
+  };
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -158,6 +183,14 @@ export default function StatsScreen() {
             )}
           </View>
         ))}
+      </View>
+
+      {/* Reset Progress Button */}
+      <View style={styles.resetContainer}>
+        <TouchableOpacity style={styles.resetBtn} onPress={handleReset}>
+          <Ionicons name="trash-outline" size={20} color={colors.danger} />
+          <Text style={styles.resetBtnText}>Reset All Progress</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -307,5 +340,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.textMuted,
     marginTop: 2,
+  },
+  resetContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+    alignItems: 'center',
+  },
+  resetBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 1,
+    borderColor: colors.danger,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    width: '100%',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+  },
+  resetBtnText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.danger,
   },
 });

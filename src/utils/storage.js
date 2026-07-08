@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { requestWidgetUpdate } from 'react-native-android-widget';
 
 // ── Storage Keys ────────────────────────────────────────────
 const SUBJECTS_KEY = '@revisely_subjects';
@@ -59,18 +60,60 @@ export async function loadCards() {
   }
 }
 
-/**
- * Persist cards array to AsyncStorage.
- * @param {Array} cards
- * @returns {boolean} true on success, false on error.
- */
 export async function saveCards(cards) {
   try {
     await AsyncStorage.setItem(CARDS_KEY, JSON.stringify(cards));
+    refreshWidget();
     return true;
   } catch (error) {
     console.warn('[storage] Failed to save cards:', error);
     return false;
+  }
+}
+
+/**
+ * Update the widget to reflect the latest cards.
+ */
+export async function refreshWidget() {
+  try {
+    const cardsRaw = await AsyncStorage.getItem(CARDS_KEY);
+    const subjectsRaw = await AsyncStorage.getItem(SUBJECTS_KEY);
+    const prefsRaw = await AsyncStorage.getItem('@revisely_widget_prefs');
+    
+    const cards = cardsRaw ? JSON.parse(cardsRaw).filter(c => !c.mastered) : [];
+    const subjects = subjectsRaw ? JSON.parse(subjectsRaw) : [];
+    const prefs = prefsRaw ? JSON.parse(prefsRaw) : { cardIndex: 0, isFlipped: false };
+    
+    const THEME_COLORS = { purple: '#8b5cf6', green: '#10b981', blue: '#3b82f6', pink: '#ec4899', amber: '#f59e0b' };
+    const { FlashcardWidget } = require('../widget/FlashcardWidget');
+    const React = require('react');
+    
+    await requestWidgetUpdate({
+      widgetName: 'FlashcardWidget',
+      renderWidget: () => {
+        if (cards.length === 0) {
+          return React.createElement(FlashcardWidget, {
+            deckName: 'Revisely', cardTitle: 'No cards yet',
+            cardText: 'Add some flashcards to get started!',
+            accentColor: '#8b5cf6', cardIndex: 0, totalCards: 0, isFlipped: false
+          });
+        }
+        const idx = Math.min(prefs.cardIndex || 0, cards.length - 1);
+        const card = cards[idx];
+        const sub = subjects.find(s => s.id === card.subjectId);
+        return React.createElement(FlashcardWidget, {
+          deckName: sub ? sub.name : 'Revisely',
+          cardTitle: card.title || 'Untitled',
+          cardText: prefs.isFlipped ? (card.back || 'No answer') : (card.front || 'No question'),
+          accentColor: THEME_COLORS[(sub && sub.theme) || card.theme] || '#8b5cf6',
+          cardIndex: idx, totalCards: cards.length, isFlipped: !!prefs.isFlipped
+        });
+      },
+      widgetNotFound: () => {},
+    });
+  } catch (e) {
+    // Widget update is best-effort
+    console.warn('[storage] Failed to refresh widget:', e);
   }
 }
 

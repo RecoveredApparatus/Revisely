@@ -2,13 +2,13 @@ import React from 'react';
 import { FlexWidget, TextWidget } from 'react-native-android-widget';
 
 /**
- * FlashcardWidget — Android home screen widget UI.
+ * FlashcardWidget — Premium Android home screen widget.
  *
  * Props:
- *   deckName     – subject / deck name shown in the header
- *   cardTitle    – the card's title, displayed prominently
+ *   deckName     – subject / deck name
+ *   cardTitle    – the card's title
  *   cardText     – front or back text depending on flip state
- *   accentColor  – hex color from the subject's theme (e.g. '#8b5cf6')
+ *   accentColor  – hex color from the subject's theme
  *   cardIndex    – 0-based index of the current card
  *   totalCards   – total number of cards in the filtered deck
  *   isFlipped    – whether the card is showing its back side
@@ -22,38 +22,42 @@ export function FlashcardWidget({
   totalCards,
   isFlipped,
 }) {
-  // Fallbacks — TextWidget requires a non-empty `text` string
-  const safeAccent = accentColor || '#8b5cf6';
-  const safeDeckName = deckName || 'Revisely';
-  const safeTitle = cardTitle || 'No card';
-  const safeText = cardText || 'Tap Flip to reveal';
-  const counter = `${(cardIndex ?? 0) + 1}/${totalCards ?? 0}`;
-  const sideLabel = isFlipped ? 'Answer' : 'Question';
-
-  // Pre-computed semi-transparent dark overlay for button backgrounds.
-  // Using a fixed dark translucent hex instead of computing from accent to
-  // avoid any string concatenation on hex values (which the library forbids).
-  const buttonBg = '#33ffffff'; // ~20 % white on dark bg
-  const accentDimBg = '#26ffffff'; // slightly dimmer variant
+  const accent = accentColor || '#8b5cf6';
+  const deck = deckName || 'Revisely';
+  const title = cardTitle || 'No card';
+  const text = cardText || 'Tap Flip to reveal';
+  const counter = `${(cardIndex ?? 0) + 1} of ${totalCards ?? 0}`;
+  const sideLabel = isFlipped ? '✦ ANSWER' : '✧ QUESTION';
 
   return (
     <FlexWidget
       style={{
         height: 'match_parent',
         width: 'match_parent',
-        backgroundColor: '#0f1118',
-        borderRadius: 16,
+        borderRadius: 20,
         flexDirection: 'column',
-        padding: 14,
+        padding: 0,
         backgroundGradient: {
-          from: '#0f1118',
-          to: '#1a1d2b',
+          from: '#12141f',
+          to: '#1e2235',
           orientation: 'TOP_BOTTOM',
         },
+        borderWidth: 1,
+        borderColor: '#2a2e42',
       }}
-      clickAction="OPEN_APP"
     >
-      {/* ── Header row: deck name + card counter ── */}
+      {/* ── Top accent strip ── */}
+      <FlexWidget
+        style={{
+          width: 'match_parent',
+          height: 4,
+          backgroundColor: accent,
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+        }}
+      />
+
+      {/* ── Header: deck name + counter ── */}
       <FlexWidget
         style={{
           width: 'match_parent',
@@ -61,87 +65,115 @@ export function FlashcardWidget({
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: 6,
+          paddingHorizontal: 18,
+          paddingTop: 14,
+          paddingBottom: 6,
         }}
       >
         <TextWidget
-          text={safeDeckName}
+          text={deck}
           style={{
-            fontSize: 13,
-            fontWeight: '700',
-            color: safeAccent,
+            fontSize: 14,
+            fontWeight: '800',
+            color: accent,
+            letterSpacing: 0.5,
           }}
           maxLines={1}
           truncate="END"
         />
-        <TextWidget
-          text={counter}
+        <FlexWidget
           style={{
-            fontSize: 12,
-            fontWeight: '600',
-            color: '#94a3b8',
+            height: 'wrap_content',
+            width: 'wrap_content',
+            backgroundColor: '#ffffff12',
+            borderRadius: 10,
+            paddingHorizontal: 10,
+            paddingVertical: 4,
+          }}
+        >
+          <TextWidget
+            text={counter}
+            style={{
+              fontSize: 12,
+              fontWeight: '700',
+              color: '#94a3b8',
+            }}
+          />
+        </FlexWidget>
+      </FlexWidget>
+
+      {/* ── Card title ── */}
+      <FlexWidget
+        style={{
+          width: 'match_parent',
+          height: 'wrap_content',
+          paddingHorizontal: 18,
+          paddingBottom: 4,
+        }}
+      >
+        <TextWidget
+          text={title}
+          style={{
+            fontSize: 20,
+            fontWeight: '800',
+            color: '#f8fafc',
+          }}
+          maxLines={2}
+          truncate="END"
+        />
+      </FlexWidget>
+
+      {/* ── Side label (QUESTION / ANSWER) ── */}
+      <FlexWidget
+        style={{
+          width: 'match_parent',
+          height: 'wrap_content',
+          paddingHorizontal: 18,
+          paddingBottom: 8,
+        }}
+      >
+        <TextWidget
+          text={sideLabel}
+          style={{
+            fontSize: 11,
+            fontWeight: '800',
+            color: accent,
+            letterSpacing: 1.5,
           }}
         />
       </FlexWidget>
 
-      {/* ── Accent divider line ── */}
-      <FlexWidget
-        style={{
-          width: 'match_parent',
-          height: 2,
-          backgroundColor: safeAccent,
-          borderRadius: 1,
-          marginBottom: 10,
-        }}
-      />
-
-      {/* ── Card title ── */}
-      <TextWidget
-        text={safeTitle}
-        style={{
-          fontSize: 17,
-          fontWeight: '700',
-          color: '#f1f5f9',
-          marginBottom: 4,
-        }}
-        maxLines={2}
-        truncate="END"
-      />
-
-      {/* ── Side label (Question / Answer) ── */}
-      <TextWidget
-        text={sideLabel}
-        style={{
-          fontSize: 11,
-          fontWeight: '600',
-          color: safeAccent,
-          marginBottom: 4,
-        }}
-      />
-
-      {/* ── Card text (front or back) — fills remaining space ── */}
+      {/* ── Card content area ── */}
       <FlexWidget
         style={{
           width: 'match_parent',
           flex: 1,
           flexDirection: 'column',
           justifyContent: 'flex-start',
-          marginBottom: 10,
+          marginHorizontal: 18,
+          marginBottom: 12,
+          paddingHorizontal: 14,
+          paddingVertical: 12,
+          backgroundColor: '#0d0f17',
+          borderRadius: 14,
+          borderWidth: 1,
+          borderColor: '#2a2e42',
         }}
       >
         <TextWidget
-          text={safeText}
+          text={text}
           style={{
-            fontSize: 14,
-            color: '#cbd5e1',
+            fontSize: 16,
+            fontWeight: '500',
+            color: '#e2e8f0',
             textAlign: 'left',
           }}
-          maxLines={6}
+          maxLines={8}
           truncate="END"
         />
       </FlexWidget>
 
-      {/* ── Bottom action bar: Prev / Flip / Next ── */}
+      {/* ── Bottom action bar ── */}
       <FlexWidget
         style={{
           width: 'match_parent',
@@ -149,71 +181,77 @@ export function FlashcardWidget({
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
+          paddingHorizontal: 14,
+          paddingBottom: 14,
           flexGap: 8,
         }}
       >
-        {/* Prev button */}
+        {/* Prev */}
         <FlexWidget
           style={{
             flex: 1,
-            height: 36,
-            backgroundColor: accentDimBg,
-            borderRadius: 8,
+            height: 44,
+            backgroundColor: '#1e2235',
+            borderRadius: 12,
             justifyContent: 'center',
             alignItems: 'center',
+            borderWidth: 1,
+            borderColor: '#2a2e42',
           }}
           clickAction="PREV_CARD"
         >
           <TextWidget
-            text="← Prev"
+            text="◀  Prev"
             style={{
-              fontSize: 13,
-              fontWeight: '600',
-              color: '#e2e8f0',
+              fontSize: 14,
+              fontWeight: '700',
+              color: '#cbd5e1',
             }}
           />
         </FlexWidget>
 
-        {/* Flip button */}
+        {/* Flip */}
         <FlexWidget
           style={{
             flex: 1,
-            height: 36,
-            backgroundColor: safeAccent,
-            borderRadius: 8,
+            height: 44,
+            backgroundColor: accent,
+            borderRadius: 12,
             justifyContent: 'center',
             alignItems: 'center',
           }}
           clickAction="FLIP_CARD"
         >
           <TextWidget
-            text="Flip"
+            text={isFlipped ? '↩  Unflip' : '↪  Flip'}
             style={{
-              fontSize: 13,
-              fontWeight: '700',
+              fontSize: 14,
+              fontWeight: '800',
               color: '#ffffff',
             }}
           />
         </FlexWidget>
 
-        {/* Next button */}
+        {/* Next */}
         <FlexWidget
           style={{
             flex: 1,
-            height: 36,
-            backgroundColor: buttonBg,
-            borderRadius: 8,
+            height: 44,
+            backgroundColor: '#1e2235',
+            borderRadius: 12,
             justifyContent: 'center',
             alignItems: 'center',
+            borderWidth: 1,
+            borderColor: '#2a2e42',
           }}
           clickAction="NEXT_CARD"
         >
           <TextWidget
-            text="Next →"
+            text="Next  ▶"
             style={{
-              fontSize: 13,
-              fontWeight: '600',
-              color: '#e2e8f0',
+              fontSize: 14,
+              fontWeight: '700',
+              color: '#cbd5e1',
             }}
           />
         </FlexWidget>

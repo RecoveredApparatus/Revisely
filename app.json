@@ -33,9 +33,10 @@
             {
               "name": "FlashcardWidget",
               "displayName": "Revisely Flashcard",
-              "minWidth": "110dp",
-              "minHeight": "110dp",
-              "updatePeriodMillis": 3600000
+              "minWidth": "250dp",
+              "minHeight": "180dp",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
             }
           ]
         }

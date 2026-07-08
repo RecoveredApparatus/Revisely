@@ -21,11 +21,20 @@ export function FlashcardWidget({
   cardIndex,
   totalCards,
   isFlipped,
+  textPage,
 }) {
   const accent = accentColor || '#8b5cf6';
   const deck = deckName || 'Revisely';
   const title = cardTitle || 'No card';
-  const text = cardText || 'Tap Flip to reveal';
+  
+  const textContent = cardText || 'Tap Flip to reveal';
+  
+  const CHARS_PER_PAGE = 220;
+  const tPage = textPage || 0;
+  const totalPages = Math.max(1, Math.ceil(textContent.length / CHARS_PER_PAGE));
+  const safePage = Math.min(tPage, totalPages - 1);
+  const displayedText = textContent.substring(safePage * CHARS_PER_PAGE, (safePage + 1) * CHARS_PER_PAGE) + (safePage < totalPages - 1 ? '...' : '');
+
   
   const currentIndex = cardIndex ?? 0;
   const total = totalCards ?? 0;
@@ -202,8 +211,31 @@ export function FlashcardWidget({
           paddingVertical: 12,
         }}
       >
+        {totalPages > 1 && (
+          <FlexWidget
+            style={{
+              width: 'match_parent',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 8,
+              borderBottomWidth: 1,
+              borderColor: '#2a2e42',
+              paddingBottom: 4,
+            }}
+          >
+            <FlexWidget clickAction="PREV_PAGE" style={{ paddingHorizontal: 8 }}>
+              <TextWidget text={safePage > 0 ? '◀' : ' '} style={{ color: accent, fontSize: 14 }} />
+            </FlexWidget>
+            <TextWidget text={`Page ${safePage + 1}/${totalPages}`} style={{ color: '#64748b', fontSize: 10, fontWeight: '700' }} />
+            <FlexWidget clickAction="NEXT_PAGE" style={{ paddingHorizontal: 8 }}>
+              <TextWidget text={safePage < totalPages - 1 ? '▶' : ' '} style={{ color: accent, fontSize: 14 }} />
+            </FlexWidget>
+          </FlexWidget>
+        )}
+        
         <TextWidget
-          text={text}
+          text={displayedText}
           style={{
             fontSize: 16,
             fontWeight: '500',

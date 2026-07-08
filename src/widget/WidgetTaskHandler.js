@@ -30,12 +30,13 @@ async function loadPrefs() {
         cardIndex: typeof parsed.cardIndex === 'number' ? parsed.cardIndex : 0,
         subjectFilter: parsed.subjectFilter || null,
         isFlipped: !!parsed.isFlipped,
+        textPage: typeof parsed.textPage === 'number' ? parsed.textPage : 0,
       };
     }
   } catch (_) {
     /* fall through to defaults */
   }
-  return { cardIndex: 0, subjectFilter: null, isFlipped: false };
+  return { cardIndex: 0, subjectFilter: null, isFlipped: false, textPage: 0 };
 }
 
 /** Persist widget preferences. */
@@ -131,6 +132,7 @@ function buildWidget(cards, subjects, prefs) {
       cardIndex={idx}
       totalCards={cards.length}
       isFlipped={prefs.isFlipped}
+      textPage={prefs.textPage}
     />
   );
 }
@@ -166,6 +168,7 @@ export async function widgetTaskHandler(props) {
           if (cards.length > 0) {
             prefs.cardIndex = (prefs.cardIndex + 1) % cards.length;
             prefs.isFlipped = false; // reset flip when navigating
+            prefs.textPage = 0; // reset page
           }
           await savePrefs(prefs);
           props.renderWidget(buildWidget(cards, subjects, prefs));
@@ -177,6 +180,7 @@ export async function widgetTaskHandler(props) {
             prefs.cardIndex =
               (prefs.cardIndex - 1 + cards.length) % cards.length;
             prefs.isFlipped = false; // reset flip when navigating
+            prefs.textPage = 0; // reset page
           }
           await savePrefs(prefs);
           props.renderWidget(buildWidget(cards, subjects, prefs));
@@ -185,6 +189,7 @@ export async function widgetTaskHandler(props) {
 
         case 'FLIP_CARD': {
           prefs.isFlipped = !prefs.isFlipped;
+          prefs.textPage = 0;
           await savePrefs(prefs);
           props.renderWidget(buildWidget(cards, subjects, prefs));
           break;
@@ -213,6 +218,7 @@ export async function widgetTaskHandler(props) {
                   prefs.cardIndex = 0;
                 }
                 prefs.isFlipped = false;
+                prefs.textPage = 0;
                 await savePrefs(prefs);
                 
                 props.renderWidget(buildWidget(newCards, subjects, prefs));
@@ -221,6 +227,29 @@ export async function widgetTaskHandler(props) {
               console.warn('Failed to master card from widget', e);
             }
           }
+          break;
+        }
+
+        case 'NEXT_PAGE': {
+          if (cards.length > 0) {
+            const card = cards[prefs.cardIndex];
+            const text = prefs.isFlipped ? card.back : card.front;
+            const maxPages = Math.ceil((text || '').length / 220);
+            if (prefs.textPage < maxPages - 1) {
+              prefs.textPage++;
+              await savePrefs(prefs);
+            }
+          }
+          props.renderWidget(buildWidget(cards, subjects, prefs));
+          break;
+        }
+
+        case 'PREV_PAGE': {
+          if (prefs.textPage > 0) {
+            prefs.textPage--;
+            await savePrefs(prefs);
+          }
+          props.renderWidget(buildWidget(cards, subjects, prefs));
           break;
         }
 

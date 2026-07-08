@@ -185,7 +185,7 @@ export function FlashcardWidget({
         />
       </FlexWidget>
 
-      {/* ── Card content area (Scrollable) ── */}
+      {/* ── Card content area ── */}
       <FlexWidget
         style={{
           width: 'match_parent',
@@ -198,46 +198,39 @@ export function FlashcardWidget({
           borderRadius: 14,
           borderWidth: 1,
           borderColor: '#2a2e42',
-          padding: 2,
-        }}
-      >
-        <ListWidget
-          style={{
-            width: 'match_parent',
-            height: 'match_parent',
-            paddingHorizontal: 12,
-            paddingVertical: 10,
-          }}
-        >
-          <TextWidget
-            text={text}
-            style={{
-              fontSize: 16,
-              fontWeight: '500',
-              color: '#e2e8f0',
-              textAlign: 'left',
-            }}
-          />
-        </ListWidget>
-      </FlexWidget>
-
-      {/* ── Dots indicator ── */}
-      <FlexWidget
-        style={{
-          width: 'match_parent',
-          justifyContent: 'center',
-          alignItems: 'center',
-          marginBottom: 8,
+          paddingHorizontal: 14,
+          paddingVertical: 12,
         }}
       >
         <TextWidget
-           text={dots.join('  ')}
-           style={{
-             fontSize: 8,
-             color: '#64748b',
-             textAlign: 'center',
-           }}
+          text={text}
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+            color: '#e2e8f0',
+            textAlign: 'left',
+          }}
+          maxLines={8}
+          truncate="END"
         />
+        
+        <FlexWidget
+          style={{
+            width: 'match_parent',
+            flex: 1,
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+          }}
+        >
+          <TextWidget
+             text={dots.join('  ')}
+             style={{
+               fontSize: 8,
+               color: '#64748b',
+               textAlign: 'center',
+             }}
+          />
+        </FlexWidget>
       </FlexWidget>
 
       {/* ── Bottom action bar ── */}

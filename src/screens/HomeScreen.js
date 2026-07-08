@@ -8,6 +8,7 @@ import {
   StyleSheet,
   StatusBar,
   Dimensions,
+  Vibration,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -128,6 +129,7 @@ export default function HomeScreen() {
 
   const handleMarkKnown = async () => {
     if (!currentCard) return;
+    Vibration.vibrate(40);
     const updatedCards = cards.map((c) =>
       c.id === currentCard.id ? { ...c, mastered: true, reviewCount: (c.reviewCount || 0) + 1 } : c
     );
@@ -352,12 +354,14 @@ export default function HomeScreen() {
           </Animated.View>
         ) : (
           <View style={styles.emptyCard}>
-            <Ionicons name="checkmark-done-circle" size={64} color={colors.green.primary} />
-            <Text style={styles.emptyTitle}>All Done! 🎉</Text>
+            <View style={{ marginBottom: 12, opacity: 0.8 }}>
+              <Text style={{ fontSize: 72 }}>🧠</Text>
+            </View>
+            <Text style={styles.emptyTitle}>You're all caught up!</Text>
             <Text style={styles.emptySubtitle}>
               {currentSubject === 'all'
-                ? "You've mastered all cards!"
-                : `All cards in this subject mastered!`}
+                ? "You've mastered every card in your deck."
+                : `You've mastered everything in this subject.`}
             </Text>
           </View>
         )}

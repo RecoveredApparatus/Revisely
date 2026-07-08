@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  TextInput,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -17,6 +18,7 @@ export default function DeckScreen({ navigation }) {
   const [cards, setCards] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [filterSubject, setFilterSubject] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useFocusEffect(
     useCallback(() => {
@@ -33,9 +35,11 @@ export default function DeckScreen({ navigation }) {
     setSubjects(loadedSubjects);
   };
 
-  const filteredCards = filterSubject === 'all'
-    ? cards
-    : cards.filter(c => c.subjectId === filterSubject);
+  const filteredCards = cards.filter(c => {
+    const matchesSubject = filterSubject === 'all' || c.subjectId === filterSubject;
+    const matchesSearch = c.title.toLowerCase().includes(searchQuery.toLowerCase()) || (c.front && c.front.toLowerCase().includes(searchQuery.toLowerCase()));
+    return matchesSubject && matchesSearch;
+  });
 
   const masteredCount = filteredCards.filter(c => c.mastered).length;
 
@@ -111,6 +115,23 @@ export default function DeckScreen({ navigation }) {
         </Text>
       </View>
 
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <Ionicons name="search" size={20} color={colors.textMuted} style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search cards..."
+          placeholderTextColor={colors.textMuted}
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity onPress={() => setSearchQuery('')}>
+            <Ionicons name="close-circle" size={20} color={colors.textMuted} />
+          </TouchableOpacity>
+        )}
+      </View>
+
       {/* Filter Chips */}
       <View style={styles.chipsRow}>
         <TouchableOpacity
@@ -136,6 +157,7 @@ export default function DeckScreen({ navigation }) {
             </TouchableOpacity>
           );
         })}
+      </ScrollView>
       </View>
 
       {/* Cards List */}
@@ -184,6 +206,26 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textMuted,
     marginTop: 4,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 20,
+    marginTop: 16,
+    backgroundColor: colors.bgCard,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    height: 44,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    color: colors.textPrimary,
+    fontSize: 14,
   },
   chipsRow: {
     flexDirection: 'row',

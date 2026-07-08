@@ -9,6 +9,8 @@ import HomeScreen from './src/screens/HomeScreen';
 import DeckScreen from './src/screens/DeckScreen';
 import StatsScreen from './src/screens/StatsScreen';
 import CardEditorScreen from './src/screens/CardEditorScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+import AIGeneratorScreen from './src/screens/AIGeneratorScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -19,6 +21,8 @@ function DeckStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="DeckList" component={DeckScreen} />
       <Stack.Screen name="CardEditor" component={CardEditorScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="AIGenerator" component={AIGeneratorScreen} />
     </Stack.Navigator>
   );
 }

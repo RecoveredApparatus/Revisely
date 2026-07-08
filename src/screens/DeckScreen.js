@@ -109,10 +109,17 @@ export default function DeckScreen({ navigation }) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Card Library</Text>
-        <Text style={styles.headerSubtitle}>
-          {masteredCount} of {filteredCards.length} mastered
-        </Text>
+        <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+          <View>
+            <Text style={styles.headerTitle}>Card Library</Text>
+            <Text style={styles.headerSubtitle}>
+              {masteredCount} of {filteredCards.length} mastered
+            </Text>
+          </View>
+          <TouchableOpacity onPress={() => navigation.navigate('Settings')}>
+            <Ionicons name="settings-outline" size={24} color={colors.textMuted} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Search Bar */}
@@ -174,13 +181,22 @@ export default function DeckScreen({ navigation }) {
         }
       />
 
-      {/* FAB */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('CardEditor', {})}
-      >
-        <Ionicons name="add" size={28} color="#fff" />
-      </TouchableOpacity>
+      {/* FABs */}
+      <View style={styles.fabContainer}>
+        <TouchableOpacity
+          style={[styles.fab, { backgroundColor: colors.blue.primary, marginBottom: 12, width: 48, height: 48, borderRadius: 24 }]}
+          onPress={() => navigation.navigate('AIGenerator')}
+        >
+          <Ionicons name="sparkles" size={20} color="#fff" />
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={styles.fab}
+          onPress={() => navigation.navigate('CardEditor', {})}
+        >
+          <Ionicons name="add" size={28} color="#fff" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -321,10 +337,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textMuted,
   },
-  fab: {
+  fabContainer: {
     position: 'absolute',
     bottom: 90,
     right: 24,
+    alignItems: 'center',
+  },
+  fab: {
     width: 56,
     height: 56,
     borderRadius: 28,

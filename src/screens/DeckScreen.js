@@ -157,7 +157,6 @@ export default function DeckScreen({ navigation }) {
             </TouchableOpacity>
           );
         })}
-      </ScrollView>
       </View>
 
       {/* Cards List */}

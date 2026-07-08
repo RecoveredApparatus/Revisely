@@ -47,6 +47,24 @@ export const colors = {
     glow: 'rgba(245, 158, 11, 0.3)',
     gradient: ['#fbbf24', '#d97706'],
   },
+  red: {
+    primary: '#ef4444',
+    light: '#f87171',
+    glow: 'rgba(239, 68, 68, 0.3)',
+    gradient: ['#f87171', '#dc2626'],
+  },
+  cyan: {
+    primary: '#06b6d4',
+    light: '#22d3ee',
+    glow: 'rgba(6, 182, 212, 0.3)',
+    gradient: ['#22d3ee', '#0891b2'],
+  },
+  lime: {
+    primary: '#84cc16',
+    light: '#a3e635',
+    glow: 'rgba(132, 204, 22, 0.3)',
+    gradient: ['#a3e635', '#65a30d'],
+  },
 
   // Semantic
   danger: '#ef4444',

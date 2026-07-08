@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlexWidget, TextWidget } from 'react-native-android-widget';
+import { FlexWidget, TextWidget, ListWidget } from 'react-native-android-widget';
 
 /**
  * FlashcardWidget — Premium Android home screen widget with "illusion" effects.
@@ -185,7 +185,7 @@ export function FlashcardWidget({
         />
       </FlexWidget>
 
-      {/* ── Card content area ── */}
+      {/* ── Card content area (Scrollable) ── */}
       <FlexWidget
         style={{
           width: 'match_parent',
@@ -194,43 +194,50 @@ export function FlashcardWidget({
           justifyContent: 'flex-start',
           marginHorizontal: 18,
           marginBottom: 8,
-          paddingHorizontal: 14,
-          paddingVertical: 12,
           backgroundColor: cardBgColor,
           borderRadius: 14,
           borderWidth: 1,
           borderColor: '#2a2e42',
+          padding: 2,
         }}
       >
-        <TextWidget
-          text={text}
-          style={{
-            fontSize: 16,
-            fontWeight: '500',
-            color: '#e2e8f0',
-            textAlign: 'left',
-          }}
-          maxLines={8}
-          truncate="END"
-        />
-        
-        <FlexWidget
+        <ListWidget
           style={{
             width: 'match_parent',
-            flex: 1,
-            justifyContent: 'flex-end',
-            alignItems: 'center',
+            height: 'match_parent',
+            paddingHorizontal: 12,
+            paddingVertical: 10,
           }}
         >
           <TextWidget
-             text={dots.join('  ')}
-             style={{
-               fontSize: 8,
-               color: '#64748b',
-               textAlign: 'center',
-             }}
+            text={text}
+            style={{
+              fontSize: 16,
+              fontWeight: '500',
+              color: '#e2e8f0',
+              textAlign: 'left',
+            }}
           />
-        </FlexWidget>
+        </ListWidget>
+      </FlexWidget>
+
+      {/* ── Dots indicator ── */}
+      <FlexWidget
+        style={{
+          width: 'match_parent',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: 8,
+        }}
+      >
+        <TextWidget
+           text={dots.join('  ')}
+           style={{
+             fontSize: 8,
+             color: '#64748b',
+             textAlign: 'center',
+           }}
+        />
       </FlexWidget>
 
       {/* ── Bottom action bar ── */}
@@ -261,10 +268,9 @@ export function FlashcardWidget({
           clickAction="PREV_CARD"
         >
           <TextWidget
-            text="◀  Prev"
+            text="◀"
             style={{
-              fontSize: 14,
-              fontWeight: '700',
+              fontSize: 16,
               color: '#cbd5e1',
             }}
           />
@@ -273,7 +279,7 @@ export function FlashcardWidget({
         {/* Flip */}
         <FlexWidget
           style={{
-            flex: 1,
+            flex: 2,
             height: 44,
             backgroundColor: accent,
             borderRadius: 12,
@@ -283,9 +289,31 @@ export function FlashcardWidget({
           clickAction="FLIP_CARD"
         >
           <TextWidget
-            text={isFlipped ? '↩  Unflip' : '↪  Flip'}
+            text={isFlipped ? '↩ Unflip' : '↪ Flip'}
             style={{
               fontSize: 14,
+              fontWeight: '800',
+              color: '#ffffff',
+            }}
+          />
+        </FlexWidget>
+
+        {/* Done / Master */}
+        <FlexWidget
+          style={{
+            flex: 1,
+            height: 44,
+            backgroundColor: '#10b981',
+            borderRadius: 12,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          clickAction="MASTER_CARD"
+        >
+          <TextWidget
+            text="✔"
+            style={{
+              fontSize: 16,
               fontWeight: '800',
               color: '#ffffff',
             }}
@@ -307,10 +335,9 @@ export function FlashcardWidget({
           clickAction="NEXT_CARD"
         >
           <TextWidget
-            text="Next  ▶"
+            text="▶"
             style={{
-              fontSize: 14,
-              fontWeight: '700',
+              fontSize: 16,
               color: '#cbd5e1',
             }}
           />

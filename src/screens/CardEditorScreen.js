@@ -21,6 +21,9 @@ const themeOptions = [
   { key: 'blue', label: 'Blue' },
   { key: 'pink', label: 'Pink' },
   { key: 'amber', label: 'Amber' },
+  { key: 'red', label: 'Red' },
+  { key: 'cyan', label: 'Cyan' },
+  { key: 'lime', label: 'Lime' },
 ];
 
 export default function CardEditorScreen({ route, navigation }) {
@@ -33,6 +36,8 @@ export default function CardEditorScreen({ route, navigation }) {
   const [front, setFront] = useState('');
   const [back, setBack] = useState('');
   const [theme, setTheme] = useState('purple');
+  const [isAddingSubject, setIsAddingSubject] = useState(false);
+  const [newSubjectName, setNewSubjectName] = useState('');
 
   useEffect(() => {
     loadData();
@@ -56,7 +61,51 @@ export default function CardEditorScreen({ route, navigation }) {
         setBack(card.back);
         setTheme(card.theme);
       }
+    } else if (loadedSubjects.length > 0) {
+      setSubjectId(loadedSubjects[0].id);
+      setTheme(loadedSubjects[0].theme);
     }
+  };
+
+  const { saveSubjects } = require('../utils/storage');
+
+  const handleAddSubject = async () => {
+    if (!newSubjectName.trim()) {
+      setIsAddingSubject(false);
+      return;
+    }
+    const newSub = {
+      id: 'sub-' + Date.now(),
+      name: newSubjectName.trim(),
+      theme: theme, // use currently selected theme
+    };
+    const updatedSubs = [...subjects, newSub];
+    setSubjects(updatedSubs);
+    setSubjectId(newSub.id);
+    await saveSubjects(updatedSubs);
+    setNewSubjectName('');
+    setIsAddingSubject(false);
+  };
+
+  const handleDeleteSubject = () => {
+    if (subjects.length <= 1) {
+      Alert.alert('Cannot delete', 'You must have at least one subject.');
+      return;
+    }
+    Alert.alert('Delete Subject', 'Delete this subject? Cards in this subject will become unassigned.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          const updatedSubs = subjects.filter(s => s.id !== subjectId);
+          setSubjects(updatedSubs);
+          setSubjectId(updatedSubs[0].id);
+          setTheme(updatedSubs[0].theme);
+          await saveSubjects(updatedSubs);
+        },
+      }
+    ]);
   };
 
   const handleSave = async () => {
@@ -110,7 +159,12 @@ export default function CardEditorScreen({ route, navigation }) {
         </View>
 
         {/* Subject Picker */}
-        <Text style={styles.label}>Subject</Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 20 }}>
+          <Text style={styles.label}>Subject</Text>
+          <TouchableOpacity onPress={handleDeleteSubject}>
+            <Text style={{ color: colors.danger, fontSize: 12, marginTop: 18 }}>Delete Selected</Text>
+          </TouchableOpacity>
+        </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.subjectPicker}>
           {subjects.map(sub => {
             const subColors = getSubjectColors(sub.theme);
@@ -134,6 +188,30 @@ export default function CardEditorScreen({ route, navigation }) {
               </TouchableOpacity>
             );
           })}
+          {!isAddingSubject ? (
+            <TouchableOpacity
+              style={[styles.subjectChip, { borderStyle: 'dashed' }]}
+              onPress={() => setIsAddingSubject(true)}
+            >
+              <Ionicons name="add" size={16} color={colors.textSecondary} />
+              <Text style={styles.subjectChipText}>New</Text>
+            </TouchableOpacity>
+          ) : (
+            <View style={[styles.subjectChip, { paddingVertical: 4, paddingRight: 4 }]}>
+              <TextInput
+                style={{ color: colors.textPrimary, fontSize: 13, width: 80, padding: 0 }}
+                value={newSubjectName}
+                onChangeText={setNewSubjectName}
+                placeholder="Name..."
+                placeholderTextColor={colors.textMuted}
+                autoFocus
+                onSubmitEditing={handleAddSubject}
+              />
+              <TouchableOpacity onPress={handleAddSubject} style={{ backgroundColor: colors.purple.primary, borderRadius: 10, padding: 4 }}>
+                <Ionicons name="checkmark" size={14} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          )}
         </ScrollView>
 
         {/* Title */}
@@ -174,25 +252,27 @@ export default function CardEditorScreen({ route, navigation }) {
 
         {/* Theme Color Picker */}
         <Text style={styles.label}>Card Accent Color</Text>
-        <View style={styles.themeRow}>
-          {themeOptions.map(opt => {
-            const optColors = getSubjectColors(opt.key);
-            const isActive = theme === opt.key;
-            return (
-              <TouchableOpacity
-                key={opt.key}
-                style={[
-                  styles.themeDot,
-                  { backgroundColor: optColors.primary },
-                  isActive && styles.themeDotActive,
-                ]}
-                onPress={() => setTheme(opt.key)}
-              >
-                {isActive && <Ionicons name="checkmark" size={14} color="#fff" />}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingHorizontal: 20 }}>
+          <View style={styles.themeRow}>
+            {themeOptions.map(opt => {
+              const optColors = getSubjectColors(opt.key);
+              const isActive = theme === opt.key;
+              return (
+                <TouchableOpacity
+                  key={opt.key}
+                  style={[
+                    styles.themeDot,
+                    { backgroundColor: optColors.primary },
+                    isActive && styles.themeDotActive,
+                  ]}
+                  onPress={() => setTheme(opt.key)}
+                >
+                  {isActive && <Ionicons name="checkmark" size={14} color="#fff" />}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </ScrollView>
 
         {/* Save Button */}
         <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
@@ -286,8 +366,8 @@ const styles = StyleSheet.create({
   },
   themeRow: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
     gap: 16,
+    paddingRight: 40, // for scroll clearance
   },
   themeDot: {
     width: 36,

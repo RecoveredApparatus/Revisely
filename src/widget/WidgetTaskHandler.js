@@ -9,6 +9,9 @@ const THEME_COLORS = {
   blue: '#3b82f6',
   pink: '#ec4899',
   amber: '#f59e0b',
+  red: '#ef4444',
+  cyan: '#06b6d4',
+  lime: '#84cc16',
 };
 
 const PREFS_KEY = '@revisely_widget_prefs';
@@ -184,6 +187,40 @@ export async function widgetTaskHandler(props) {
           prefs.isFlipped = !prefs.isFlipped;
           await savePrefs(prefs);
           props.renderWidget(buildWidget(cards, subjects, prefs));
+          break;
+        }
+
+        case 'MASTER_CARD': {
+          if (cards.length > 0) {
+            const cardToMaster = cards[prefs.cardIndex];
+            try {
+              // Load ALL cards to update the true database
+              const raw = await AsyncStorage.getItem(CARDS_KEY);
+              if (raw) {
+                let allCards = JSON.parse(raw);
+                allCards = allCards.map(c => 
+                  c.id === cardToMaster.id ? { ...c, mastered: true } : c
+                );
+                await AsyncStorage.setItem(CARDS_KEY, JSON.stringify(allCards));
+                
+                // Refresh local unmastered cards list for widget
+                const newCards = allCards.filter(c => !c.mastered && (!prefs.subjectFilter || c.subjectId === prefs.subjectFilter));
+                
+                if (newCards.length > 0) {
+                  // Keep index in bounds
+                  prefs.cardIndex = Math.min(prefs.cardIndex, newCards.length - 1);
+                } else {
+                  prefs.cardIndex = 0;
+                }
+                prefs.isFlipped = false;
+                await savePrefs(prefs);
+                
+                props.renderWidget(buildWidget(newCards, subjects, prefs));
+              }
+            } catch (e) {
+              console.warn('Failed to master card from widget', e);
+            }
+          }
           break;
         }
 
